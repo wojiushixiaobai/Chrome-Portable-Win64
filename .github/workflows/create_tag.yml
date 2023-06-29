@@ -26,7 +26,7 @@ jobs:
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}" || true
-          git push origin ${{ steps.setup-chrome.outputs.chrome-version }} || true
+          git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}"
+          git push origin ${{ steps.setup-chrome.outputs.chrome-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
