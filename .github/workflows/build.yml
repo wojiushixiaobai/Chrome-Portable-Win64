@@ -1,7 +1,7 @@
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 name: Create Release And Upload assets
 
@@ -22,11 +22,18 @@ jobs:
       - name: Compress Chrome
         run: |
           7z a -tzip chrome-win.zip 'C:\Program Files\Google\Chrome'
+      - name: Download Driver
+        run: |
+          $build_version=${{ steps.setup-chrome.outputs.chrome-version }}.Split('.')[0]
+          $release_version=Invoke-WebRequest -Uri https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$build_version | Select -ExpandProperty Content
+          Invoke-WebRequest -Uri https://chromedriver.storage.googleapis.com/$release_version/chromedriver_win32.zip -OutFile chromedriver_win32.zip
       - name: Release Upload
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          name: ${{ steps.setup-chrome.outputs.chrome-version }}
           files: |
             chrome-win.zip
+            chromedriver_win32.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
