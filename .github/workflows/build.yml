@@ -1,0 +1,13 @@
+name: 'build-test'
+on:
+  pull_request:
+  push:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+  - uses: browser-actions/setup-chrome@v1
+    with:
+      chrome-version: 'stable'
+  - run: (Get-Item (Get-Command chrome).Source).VersionInfo.ProductVersion
