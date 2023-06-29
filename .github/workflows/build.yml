@@ -7,7 +7,10 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-  - uses: browser-actions/setup-chrome@v1
-    with:
-      chrome-version: 'stable'
-  - run: (Get-Item (Get-Command chrome).Source).VersionInfo.ProductVersion
+      - uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: 'stable'
+      - name: Get Chrome version
+        id: chrome-version
+        run: echo "version=(Get-Item (Get-Command chrome).Source).VersionInfo.ProductVersion" >> $GITHUB_OUTPUT
+      - run: echo "Chrome version ${{ steps.chrome-version.outputs.version }}"
