@@ -22,17 +22,11 @@ jobs:
       - name: Chrome version
         run: |
           echo ${{ steps.setup-chrome.outputs.chrome-version }}
-      - name: Check tag
-        id: create_tag
-        run: |
-          git fetch --tags
-          git tag -l | grep -q ${{ steps.setup-chrome.outputs.chrome-version }} || echo "create_tag=true" >> $GITHUB_GITHUB_OUTPUT
       - name: Create Tag
-        if: steps.create_tag.outputs.create_tag == 'true'
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}"
-          git push origin ${{ steps.setup-chrome.outputs.chrome-version }}
+          git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}" || true
+          git push origin ${{ steps.setup-chrome.outputs.chrome-version }} || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
