@@ -35,13 +35,13 @@ jobs:
           7z a -tzip chrome-win.zip 'C:\Program Files\Google\Chrome'
       - name: Download Driver
         run: |
-          $build_version="${{ steps.setup-chrome.outputs.chrome-version }}".Split('.')[0]
-          $release_version=Invoke-WebRequest -Uri https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$build_version | Select -ExpandProperty Content
-          Invoke-WebRequest -Uri https://chromedriver.storage.googleapis.com/$release_version/chromedriver_win32.zip -OutFile chromedriver_win32.zip
+          Invoke-WebRequest -Uri https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${{ steps.setup-chrome.outputs.chrome-version }}/win32/chromedriver-win32.zip -OutFile chromedriver_win32.zip
+          Invoke-WebRequest -Uri https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${{ steps.setup-chrome.outputs.chrome-version }}/win64/chromedriver-win64.zip -OutFile chromedriver-win64.zip
       - name: Create Release
         run: |
           gh release create ${{ steps.setup-chrome.outputs.chrome-version }} --notes "Release ${{ steps.setup-chrome.outputs.chrome-version }}"
           gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chrome-win.zip
           gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chromedriver_win32.zip
+          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chromedriver-win64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
