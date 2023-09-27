@@ -10,18 +10,17 @@ name: Checkout and Create Release Version
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v1
-        id: setup-chrome
-        with:
-          chrome-version: 'stable'
+
       - name: Chrome version
+        id: setup-chrome
         run: |
-          echo ${{ steps.setup-chrome.outputs.chrome-version }}
+          version=$(curl --silent "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r '.channels.Stable.version')
+          echo "chrome-version=${version}" >> $GITHUB_OUTPUT
+
       - name: Create Tag
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
@@ -30,18 +29,15 @@ jobs:
           git push origin ${{ steps.setup-chrome.outputs.chrome-version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Compress Chrome
+
+      - name: Download Files
         run: |
-          7z a -tzip chrome-win.zip 'C:\Program Files\Google\Chrome'
-      - name: Download Driver
-        run: |
-          Invoke-WebRequest -Uri https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${{ steps.setup-chrome.outputs.chrome-version }}/win32/chromedriver-win32.zip -OutFile chromedriver_win32.zip
-          Invoke-WebRequest -Uri https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${{ steps.setup-chrome.outputs.chrome-version }}/win64/chromedriver-win64.zip -OutFile chromedriver-win64.zip
+          for file in $(curl --silent "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r '.channels.Stable.downloads.chrome[].url'); do wget "${file}"; done
+          for file in $(curl --silent "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json" | jq -r '.channels.Stable.downloads.chromedriver[].url'); do wget "${file}"; done
+
       - name: Create Release
         run: |
           gh release create ${{ steps.setup-chrome.outputs.chrome-version }} --notes "Release ${{ steps.setup-chrome.outputs.chrome-version }}"
-          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chrome-win.zip
-          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chromedriver_win32.zip
-          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chromedriver-win64.zip
+          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} *.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
