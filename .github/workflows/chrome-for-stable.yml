@@ -1,0 +1,41 @@
+on:
+
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 1 * * *'
+
+name: Chrome for Stable Release Version
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+        with:
+          chrome-version: 'stable'
+      - name: Chrome version
+        run: |
+          echo ${{ steps.setup-chrome.outputs.chrome-version }}
+      - name: Create Tag
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}"
+          git push origin ${{ steps.setup-chrome.outputs.chrome-version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compress Chrome
+        run: |
+          7z a -tzip chrome-win.zip 'C:\Program Files\Google\Chrome'
+      - name: Create Release
+        run: |
+          gh release create ${{ steps.setup-chrome.outputs.chrome-version }} --notes "Chrome for Stable Release ${{ steps.setup-chrome.outputs.chrome-version }}"
+          gh release upload ${{ steps.setup-chrome.outputs.chrome-version }} chrome-win.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
