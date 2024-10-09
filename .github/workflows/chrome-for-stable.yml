@@ -13,7 +13,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         id: setup-chrome
@@ -24,8 +24,8 @@ jobs:
           echo ${{ steps.setup-chrome.outputs.chrome-version }}
       - name: Create Tag
         run: |
-          git config --global user.name "${GITHUB_ACTOR}"
-          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
           git tag -a ${{ steps.setup-chrome.outputs.chrome-version }} -m "Release Version ${{ steps.setup-chrome.outputs.chrome-version }}"
           git push origin ${{ steps.setup-chrome.outputs.chrome-version }}
         env:
